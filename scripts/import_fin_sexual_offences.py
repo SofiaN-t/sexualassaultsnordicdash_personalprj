@@ -79,13 +79,18 @@ fn_group.head()
 fn_group['Offence group and specifier for criminal act'].unique()
 fn_group['Offence group and specifier for criminal act'].nunique()
 
+## Remove the columns with the subcodes that were extracted by mistake
+pattern = r"^\d{4}[a-zA-Z]\d+"
+fn_group_parent_codes = fn_group.loc[~fn_group["Offence group and specifier for criminal act"].str.match(pattern)].copy()
+fn_group_parent_codes['Offence group and specifier for criminal act'].unique()
+
 ## Group the offences
 def classify_offence(offence):
     offence = offence.lower()  
 
-    if "rape" in offence:
+    if ("rape" in offence) & ("child" not in offence):
         return "Rape / Aggravated Rape"
-    elif (("heterosexual offence" in offence or "homosexual offence" in offence or "any other kind of sexual offence" in offence) and 'child' not in offence):
+    elif ("other sexual crimes" in offence) or ("sexual assault" in offence):
         return "Sexual Assault / Abuse (Non-Rape)"
     elif "child" in offence:
         return "Child Sexual Offences"
@@ -93,11 +98,19 @@ def classify_offence(offence):
         return "Incest / Family-based Offences"
     elif "grooming" in offence:
         return "Grooming / Contact for Sexual Purposes"
-    elif "public decency" in offence or "groping" in offence or "indecent exposure" in offence:
+    elif "sexual harassment" in offence or "non-consensual dissemination" in offence:
         return "Sexual Harassment / Public Decency / Non-Contact Offences"
     elif "prostitution" in offence:
         return "Exploitation / Commercial Sex (Prostitution, Pimping)"
     else:
         return "Uncategorized"
     
-dk_year["Offence_group"] = dk_year["Offence_type"].apply(classify_offence)
+fn_group_parent_codes["Offence_group"] = fn_group_parent_codes["Offence group and specifier for criminal act"].apply(classify_offence)
+fn_group_parent_codes["Offence_group"].unique()
+
+# Totals
+fin_df = fn_group_parent_codes.groupby(['Offence_group', 'Year'])['value'].sum().reset_index()
+fin_df.head()
+
+# Save
+fin_df.to_csv('data/clean/fin_clean.csv')
