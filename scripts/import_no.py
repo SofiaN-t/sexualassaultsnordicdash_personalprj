@@ -78,10 +78,17 @@ no_child_sum = no_xlsx_child.sum(numeric_only=True)
 no_child_sum
 ## Compare 
 df_no["Offence_count"].loc[df_no['Offence_group']=='Child Sexual Offences'].values == no_child_sum.values
+### Checks out
 
 ## For rape
-no_xlsx_rape = no_xlsx.loc[no_xlsx['Offence']=='¬¬ Rape, total'].drop(columns='Offence')
-no_xlsx_rape.values
-df_no['Offence_count'].loc[df_no['Offence_group']=='Rape / Aggravated Rape'].values == no_xlsx_rape.values
-### Actually, cannot take the Rape, total because it also includes the children assaults
+no_xlsx_rape = no_xlsx.loc[((no_xlsx['Offence']=='¬¬¬¬ Rape, other or unspecified age') | 
+                           (no_xlsx['Offence']=='¬¬¬¬ Aggravated rape, other or unspecified age') |
+                           (no_xlsx['Offence']=='¬¬ Attempted rape'))
+                           ].drop(columns='Offence')
+# no_xlsx_rape.values.sum(axis=0)
+df_no['Offence_count'].loc[df_no['Offence_group']=='Rape / Aggravated Rape'].values == no_xlsx_rape.values.sum(axis=0)
+### Checks out
+
+# Write
+df_no.to_csv('data/clean/no_clean.csv')
 
