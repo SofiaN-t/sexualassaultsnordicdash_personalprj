@@ -67,3 +67,6 @@ swe_group['Offence_count'].loc[swe_group['Offence_group']=='Child Sexual Offence
 swe_raw_rape = swe_raw.loc[swe_raw['Offence'].str.contains('rape')]
 swe_raw_rape.head()
 swe_group['Offence_count'].loc[swe_group['Offence_group']=='Rape / Aggravated Rape'].values == swe_raw_rape.sum(numeric_only=True).values
+
+# Export
+swe_group.to_csv('data/clean/swe_clean.csv')
